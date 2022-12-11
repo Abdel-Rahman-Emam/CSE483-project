@@ -14,7 +14,7 @@ to run this code you need to have:
 in order to have debugging mode on, you need to open ```supporting_functions.py``` and then set debugging to True, this will execute the commands to output images to the folders associated in /code
 
 
-#Names:
+# Names:
 Abdel Rahman Emam Ali Sadek Kassab 18P3602
 Joseph Fakher Farid 18P2605
 Mostafa El Sherief 16P8115
