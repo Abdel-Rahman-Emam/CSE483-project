@@ -16,11 +16,14 @@ import json
 import pickle
 import matplotlib.image as mpimg
 import time
+import glob
+from pathlib import Path
+
 
 # Import functions for perception and decision making
 from perception import perception_step
 from decision import decision_step
-from supporting_functions import update_rover, create_output_images
+from supporting_functions import update_rover, create_output_images, debugging #imported debugging to be able to use it to delete files
 # Initialize socketio server and Flask application 
 # (learn more at: https://python-socketio.readthedocs.io/en/latest/)
 sio = socketio.Server()
@@ -34,7 +37,6 @@ ground_truth = mpimg.imread('../calibration_images/map_bw.png')
 # and puts the map into the green channel.  This is why the underlying 
 # map output looks green in the display image
 ground_truth_3d = np.dstack((ground_truth*0, ground_truth*255, ground_truth*0)).astype(np.float)
-
 # Define RoverState() class to retain rover state parameters
 class RoverState():
     def __init__(self):
@@ -65,8 +67,21 @@ class RoverState():
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
         # on screen in autonomous mode
-        self.vision_image = np.zeros((160, 320, 3), dtype=np.float) 
+        self.vision_image = np.zeros((160, 320, 3), dtype=np.float)
+        #the following images were added to the rover in order to display the debugging mode which saves images to the directories
+        #according to their names
+        #warped view
+        self.warped_image = np.zeros((160, 320, 3), dtype = np.float)
+        #Map threshold
+        self.threshold_image = np.zeros((160, 320, 3), dtype = np.float)
+        #Rock threshold
+        self.rock_thresh_image = np.zeros((160, 320, 3), dtype = np.float)
+        #Obstacle threshold
+        self.obstacle_thresh_image = np.zeros((160, 320, 3), dtype = np.float)
+        #Navigable threshold
+        self.navigable_thresh_image = np.zeros((160, 320, 3), dtype = np.float)
         # Worldmap
+
         # Update this image with the positions of navigable terrain
         # obstacles and rock samples
         self.worldmap = np.zeros((200, 200, 3), dtype=np.float) 
@@ -79,14 +94,20 @@ class RoverState():
         self.send_pickup = False # Set to True to trigger rock pickup
 # Initialize our rover 
 Rover = RoverState()
-
+# the following lines in the code are used to make new debugging for each run
+if debugging:
+    [f.unlink() for f in Path(os.getcwd()+"/navthresh").glob("*") if f.is_file()]
+    [f.unlink() for f in Path(os.getcwd()+"/obstaclethresh").glob("*") if f.is_file()]
+    [f.unlink() for f in Path(os.getcwd()+"/warped").glob("*") if f.is_file()]
+    [f.unlink() for f in Path(os.getcwd()+"/rockthresh").glob("*") if f.is_file()]
+    [f.unlink() for f in Path(os.getcwd()+"/visimg").glob("*") if f.is_file()]
+    [f.unlink() for f in Path(os.getcwd()+"/map").glob("*") if f.is_file()]
 # Variables to track frames per second (FPS)
 # Intitialize frame counter
 frame_counter = 0
 # Initalize second counter
 second_counter = time.time()
 fps = None
-
 
 # Define telemetry function for what to do with incoming data
 @sio.on('telemetry')
@@ -165,7 +186,7 @@ def send_control(commands, image_string1, image_string2):
         'brake': commands[1].__str__(),
         'steering_angle': commands[2].__str__(),
         'inset_image1': image_string1,
-        'inset_image2': image_string2,
+        'inset_image2': image_string2
         }
     # Send commands via socketIO server
     sio.emit(
