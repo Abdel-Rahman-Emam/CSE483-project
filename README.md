@@ -1,6 +1,5 @@
 # CSE483-project
 ## NASA Rover Simulator Vision Project
-Disclaimer: the current project is still in phase 1, and further modifications are yet to be done.
 
 # To run this code
 to run this code you need to have:
