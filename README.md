@@ -19,3 +19,4 @@ Abdel Rahman Emam Ali Sadek Kassab 18P3602
 Joseph Fakher Farid 18P2605
 Mostafa El Sherief 16P8115
 Reda Mohsen Reda 18P5141
+Noor Eldin Talaat 18P3826
