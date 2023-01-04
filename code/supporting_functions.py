@@ -4,10 +4,13 @@ from PIL import Image
 from io import BytesIO, StringIO
 import base64
 import time
-
+import glob
+import os
+import shutil
+from pathlib import Path
 # Define a function to convert telemetry strings to float independent of decimal convention
-
-
+x=0
+debugging = False
 def convert_to_float(string_to_convert):
     if ',' in string_to_convert:
         float_value = np.float(string_to_convert.replace(',', '.'))
@@ -72,7 +75,7 @@ def update_rover(Rover, data):
 
 
 def create_output_images(Rover):
-
+    global x
     # Create a scaled map for plotting and clean up obs/nav pixels a bit
     if np.max(Rover.worldmap[:, :, 2]) > 0:
         nav_pix = Rover.worldmap[:, :, 2] > 0
@@ -149,15 +152,73 @@ def create_output_images(Rover):
                 cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     cv2.putText(map_add, "  Collected: "+str(Rover.samples_collected), (0, 85),
                 cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, "State: "+str(Rover.mode), (0, 145),
+                cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
     # Convert map and vision image to base64 strings for sending to server
+    global debugging
     pil_img = Image.fromarray(map_add.astype(np.uint8))
     buff = BytesIO()
+    if debugging:#if we're in debugging mode, we're gonna start saving images from the pipeline
+        pil_img.save("map/map"+str(x)+".jpeg")
     pil_img.save(buff, format="JPEG")
     encoded_string1 = base64.b64encode(buff.getvalue()).decode("utf-8")
 
     pil_img = Image.fromarray(Rover.vision_image.astype(np.uint8))
     buff = BytesIO()
+    if debugging:#if we're in debugging mode, we're gonna start saving images from the pipeline
+        pil_img.save("navthresh/visimg"+str(x)+".jpeg")
     pil_img.save(buff, format="JPEG")
     encoded_string2 = base64.b64encode(buff.getvalue()).decode("utf-8")
+    if debugging: #if we're in debugging mode, we're gonna start saving images from the pipeline
+        pil_img = Image.fromarray(Rover.navigable_thresh_image.astype(np.uint8))
+        buff = BytesIO()
+        pil_img.save("visimg/navthresh"+str(x)+".jpeg")
+
+        pil_img = Image.fromarray(Rover.warped.astype(np.uint8))
+        buff = BytesIO()
+        pil_img.save("warped/warped"+str(x)+".jpeg")
+
+        pil_img = Image.fromarray(Rover.rock_thresh_image.astype(np.uint8))
+        buff = BytesIO()
+        pil_img.save("rockthresh/rockthresh"+str(x)+".jpeg")
+
+        pil_img = Image.fromarray(Rover.obstacle_thresh_image.astype(np.uint8))
+        buff = BytesIO()
+        pil_img.save("obstaclethresh/obstaclethresh"+str(x)+".jpeg")
+        x+=1
+
 
     return encoded_string1, encoded_string2
+
+'''
+def merge_images_vertical(image1, image2):
+    (width1, height1) = image1.size
+    (width2, height2) = image2.size
+
+    # result_width = width1 + width2
+    result_width = int(width1/2)
+    # result_height = max(height1, height2)
+    result_height = int((height1 + height2))
+
+    result = Image.new('RGB', (result_width, result_height))
+    result.paste(im=image1, box=(0, 0))
+    result.paste(im=image2, box=(0, height1))
+    return result
+
+def merge_images_horizontal(image1, image2):
+    (width1, height1) = image1.size
+    (width2, height2) = image2.size
+    #(width3, height3) = image3.size
+    result_width = width1 + width2
+    result_height = max(height1, height2)
+
+    #result_width = width1 + width2 + width3
+    #result_height = max(height1, height2, height3)
+
+    result = Image.new('RGB', (result_width, result_height))
+    result.paste(im=image1, box=(0, 0))
+    result.paste(im=image2, box=(width1, 0))
+
+    #result.paste(im=image3, box=(width1+width2, 0))
+    return result
+'''
