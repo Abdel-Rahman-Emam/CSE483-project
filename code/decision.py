@@ -6,7 +6,6 @@ def decision_step(Rover):
     # Implement conditionals to decide what to do given perception data
     # Here you're all set up with some basic functionality but you'll need to
     # improve on this decision tree to do a good job of navigating autonomously!
-
     # offset in rad used to hug the left wall.
     offset = 0
     # Only apply left wall hugging when out of the starting point (after 10s)
@@ -18,15 +17,15 @@ def decision_step(Rover):
         offset = 0.7 * np.std(Rover.nav_angles)
 
     # Check if we have vision data to make decisions with
-    if Rover.samples_collected >= 2 and Rover.samples_located >= 3:
+    if Rover.samples_collected >= 5:
         print('RETURNING HOME')
-        if abs(Rover.pos[0] - Rover.start_pos[0]) < 20 and abs(Rover.pos[1] - Rover.start_pos[1]) < 20:
+        if abs(Rover.pos[0] - Rover.start_pos[0]) < 5 and abs(Rover.pos[1] - Rover.start_pos[1]) < 5:
             Rover.throttle = 0
             Rover.brake = Rover.brake_set
             Rover.steer = 0
             print('RETURNED HOME!!!! BEAM ME UP!!!')
             return Rover
-    elif Rover.nav_angles is not None:
+    if Rover.nav_angles is not None:
         if Rover.mode == 'forward':
             # if sample rock on sight (in the left side only) and relatively close
             if Rover.samples_angle is not None and np.mean(Rover.samples_angle) > -0.3 and np.min(Rover.samples_dist) < 40:
