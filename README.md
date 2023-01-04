@@ -18,3 +18,4 @@ in order to have debugging mode on, you need to open ```supporting_functions.py`
 Abdel Rahman Emam Ali Sadek Kassab 18P3602
 Joseph Fakher Farid 18P2605
 Mostafa El Sherief 16P8115
+Reda Mohsen Reda 18P5141
