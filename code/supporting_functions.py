@@ -10,11 +10,7 @@ import shutil
 from pathlib import Path
 # Define a function to convert telemetry strings to float independent of decimal convention
 x=0
-<<<<<<< HEAD
 debugging = False
-=======
-debugging = True
->>>>>>> 2a7e44e62faae91138c496e51e9e48e024b6d175
 def convert_to_float(string_to_convert):
     if ',' in string_to_convert:
         float_value = np.float(string_to_convert.replace(',', '.'))
